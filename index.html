@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>NewBot · Academia IA · NewCap</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green:       #94D500;
+    --green-dark:  #6EA000;
+    --green-light: #d4f000;
+    --black:       #0A0A0A;
+    --gray-800:    #1A1A1A;
+    --gray-600:    #444444;
+    --gray-300:    #CCCCCC;
+    --gray-100:    #F4F4F4;
+    --white:       #FFFFFF;
+    --font:        'Poppins', sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    height: 100%; width: 100%;
+    overflow: hidden;
+    font-family: var(--font);
+    background: var(--gray-800);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── WRAPPER ── */
+  #app {
+    display: flex;
+    flex-direction: column;
+    height: 100dvh;
+    max-width: 480px;
+    margin: 0 auto;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* ════════════════════════════════════════
+     WELCOME SCREEN
+  ════════════════════════════════════════ */
+  #welcome {
+    position: absolute;
+    inset: 0;
+    background: var(--gray-800);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 50;
+    overflow-y: auto;
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+
+  #welcome.hide {
+    opacity: 0;
+    transform: translateY(-20px);
+    pointer-events: none;
+  }
+
+  .welcome-hero {
+    width: 100%;
+    background: linear-gradient(180deg, #1a1a1a 0%, #0A0A0A 100%);
+    display: flex;
+    justify-content: center;
+    padding-top: 40px;
+    flex-shrink: 0;
+  }
+
+  .welcome-robot {
+    width: 220px;
+    height: 220px;
+    border-radius: 50%;
+    object-fit: cover;
+    object-position: center 8%;
+    border: 3px solid var(--green);
+    box-shadow: 0 0 40px rgba(148,213,0,0.3), 0 0 80px rgba(148,213,0,0.1);
+  }
+
+  .welcome-body {
+    flex: 1;
+    width: 100%;
+    padding: 28px 28px 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .welcome-title {
+    text-align: center;
+  }
+
+  .welcome-title h1 {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--white);
+    line-height: 1.2;
+    margin-bottom: 6px;
+  }
+
+  .welcome-title p {
+    font-size: 13px;
+    font-weight: 300;
+    color: var(--green);
+    letter-spacing: 0.03em;
+  }
+
+  .welcome-copy {
+    padding: 0 4px;
+  }
+
+  .welcome-copy p {
+    font-size: 14px;
+    font-weight: 300;
+    color: var(--gray-300);
+    line-height: 1.7;
+  }
+
+  .welcome-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .field-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--gray-300);
+    margin-bottom: 4px;
+    display: block;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .welcome-input {
+    width: 100%;
+    background: var(--gray-800);
+    border: 1.5px solid #333;
+    border-radius: 12px;
+    padding: 14px 16px;
+    font-family: var(--font);
+    font-size: 15px;
+    font-weight: 400;
+    color: var(--white);
+    outline: none;
+    transition: border-color 0.2s;
+    -webkit-appearance: none;
+  }
+
+  .welcome-input::placeholder { color: #555; }
+  .welcome-input:focus { border-color: var(--green); }
+
+  .welcome-btn {
+    width: 100%;
+    padding: 16px;
+    border-radius: 14px;
+    background: var(--green);
+    border: none;
+    font-family: var(--font);
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--black);
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    margin-top: 4px;
+    letter-spacing: 0.02em;
+  }
+
+  .welcome-btn:hover  { background: var(--green-dark); }
+  .welcome-btn:active { transform: scale(0.98); }
+  .welcome-btn:disabled { background: #333; color: #666; cursor: not-allowed; }
+
+  .welcome-disclaimer {
+    text-align: center;
+    font-size: 11px;
+    font-weight: 300;
+    color: #555;
+    line-height: 1.6;
+  }
+
+  .welcome-disclaimer span { color: var(--green); }
+
+  /* ════════════════════════════════════════
+     CHAT SCREEN
+  ════════════════════════════════════════ */
+  #chat-screen {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    background: var(--white);
+  }
+
+  #chat-screen.show { opacity: 1; }
+
+  /* ── HEADER ── */
+  header {
+    background: #1F2C34;
+    border-bottom: 1px solid #2A3942;
+    display: flex;
+    align-items: center;
+    padding: 0 18px;
+    gap: 12px;
+    flex-shrink: 0;
+    height: 66px;
+    position: relative;
+    z-index: 10;
+  }
+
+  .bot-avatar {
+    width: 42px; height: 42px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid var(--green);
+    flex-shrink: 0;
+    background: #111;
+  }
+  .bot-avatar img { width: 100%; height: 100%; object-fit: cover; object-position: center 8%; }
+
+  .header-info { flex: 1; }
+  .header-name { font-size: 16px; font-weight: 700; color: var(--white); line-height: 1.2; }
+  .header-sub  { font-size: 12px; font-weight: 300; color: var(--green); margin-top: 1px; }
+
+  .header-right { display: flex; align-items: center; gap: 8px; }
+
+  .status-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 0 2px rgba(148,213,0,0.3);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%,100% { box-shadow: 0 0 0 2px rgba(148,213,0,0.3); }
+    50%      { box-shadow: 0 0 0 6px rgba(148,213,0,0.1); }
+  }
+
+  /* ── CHAT AREA ── */
+  #chat {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    background: #0D1117;
+  }
+  #chat::-webkit-scrollbar { display: none; }
+
+  /* ── BUBBLES ── */
+  .bubble-wrap {
+    display: flex; flex-direction: column; gap: 3px;
+    animation: fadeUp 0.25s ease both;
+  }
+  .bubble-wrap.user { align-items: flex-end; }
+  .bubble-wrap.bot  { align-items: flex-start; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .bubble {
+    max-width: 80%;
+    padding: 10px 14px;
+    border-radius: 18px;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.55;
+    word-break: break-word;
+  }
+
+  .bubble.bot {
+    background: #202C33;
+    color: #E9EDEF;
+    border-bottom-left-radius: 4px;
+  }
+
+  .bubble.user {
+    background: var(--green);
+    color: var(--black);
+    font-weight: 500;
+    border-bottom-right-radius: 4px;
+    box-shadow: 0 2px 8px rgba(148,213,0,0.25);
+  }
+
+  .bubble.bot a {
+    color: var(--green);
+    font-weight: 600;
+    text-decoration: none;
+    word-break: break-all;
+  }
+
+  .ts { font-size: 10px; font-weight: 300; color: #667781; padding: 0 4px; margin-top: 2px; }
+
+  /* ── TYPING ── */
+  .typing-bubble {
+    background: #202C33;
+    border-radius: 18px; border-bottom-left-radius: 4px;
+    padding: 12px 16px;
+    display: flex; gap: 5px; align-items: center;
+    max-width: 72px;
+    animation: fadeUp 0.2s ease both;
+  }
+  .typing-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%; background: #8696A0;
+    animation: typing 1.2s infinite ease-in-out;
+  }
+  .typing-dot:nth-child(1) { animation-delay: 0s; }
+  .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes typing {
+    0%,60%,100% { transform: translateY(0); opacity: 0.4; }
+    30%          { transform: translateY(-5px); opacity: 1; }
+  }
+
+  /* ── CHIPS ── */
+  .chips-wrap {
+    display: flex; flex-direction: column; gap: 8px;
+    margin: 6px 0 10px;
+    animation: fadeUp 0.35s ease both;
+  }
+  .chips-label {
+    font-size: 12px; font-weight: 300; color: #8696A0;
+    padding: 0 2px; margin-bottom: 4px;
+  }
+  .chip {
+    display: block;
+    padding: 12px 16px;
+    border-radius: 14px;
+    border: 1.5px solid var(--green);
+    background: rgba(148,213,0,0.08);
+    font-family: var(--font);
+    font-size: 13px;
+    font-weight: 500;
+    color: #D4EE8A;
+    cursor: pointer;
+    text-align: left;
+    line-height: 1.4;
+    transition: background 0.15s, transform 0.1s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .chip:hover  { background: rgba(148,213,0,0.18); }
+  .chip:active { transform: scale(0.97); }
+
+  /* ── INPUT AREA ── */
+  #input-area {
+    padding: 10px 12px;
+    padding-bottom: max(10px, env(safe-area-inset-bottom));
+    background: #1F2C34;
+    border-top: 1px solid #2A3942;
+    display: flex; align-items: center; gap: 10px;
+    flex-shrink: 0; position: relative; z-index: 10;
+  }
+
+  #user-input {
+    flex: 1;
+    border: none;
+    border-radius: 24px;
+    padding: 11px 18px;
+    font-family: var(--font); font-size: 14px; font-weight: 300; color: #E9EDEF;
+    background: #2A3942;
+    outline: none;
+    height: 44px;
+    line-height: 1.4;
+    transition: background 0.2s;
+  }
+  #user-input:focus    { background: #2A3942; }
+  #user-input::placeholder { color: #8696A0; }
+
+  #send-btn {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: var(--green); border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.2s, transform 0.1s, opacity 0.2s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  #send-btn:hover    { background: var(--green-dark); }
+  #send-btn:active   { transform: scale(0.92); }
+  #send-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  #send-btn svg { width: 16px; height: 16px; }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ══ WELCOME SCREEN ══ -->
+  <div id="welcome">
+    <div class="welcome-hero">
+      <img class="welcome-robot" src="/newbot-avatar.png" alt="NewBot">
+    </div>
+
+    <div class="welcome-body">
+      <div class="welcome-title">
+        <h1>Hola 👋 Soy NewBot</h1>
+        <p>Tu asesor de la Academia IA de NewCap</p>
+      </div>
+
+      <div class="welcome-copy">
+        <p>
+          Para que cada conversación sea realmente útil,
+          necesito conocerte un poco.
+        </p>
+        <p style="margin-top:8px; color: var(--green);">
+          Solo te lo pedimos una vez. Prometido 😊
+        </p>
+      </div>
+
+      <div class="welcome-form">
+        <div>
+          <label class="field-label" for="input-name">Tu nombre</label>
+          <input
+            class="welcome-input"
+            id="input-name"
+            type="text"
+            placeholder="Escribe tu nombre"
+            autocomplete="given-name"
+            spellcheck="false"
+          >
+        </div>
+        <div>
+          <label class="field-label" for="input-role">¿Cuál es tu cargo o rol?</label>
+          <input
+            class="welcome-input"
+            id="input-role"
+            type="text"
+            placeholder="Ej: Jefa de Capacitación, Consultor, Gerente RRHH..."
+            spellcheck="false"
+          >
+        </div>
+        <button class="welcome-btn" id="start-btn" onclick="startExperience()">
+          Comenzar mi experiencia →
+        </button>
+        <p class="welcome-disclaimer">
+          No compartiremos estos datos con nadie.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ CHAT SCREEN ══ -->
+  <div id="chat-screen">
+    <header>
+      <div class="bot-avatar">
+        <img src="/newbot-avatar.png" alt="NewBot">
+      </div>
+      <div class="header-info">
+        <div class="header-name">NewBot</div>
+        <div class="header-sub">Academia IA</div>
+      </div>
+      <div class="header-right">
+        <div class="status-dot"></div>
+      </div>
+    </header>
+
+    <div id="chat"></div>
+
+    <div id="input-area">
+      <input
+        type="text" id="user-input"
+        placeholder="Escribe tu pregunta..."
+        autocomplete="off" spellcheck="false"
+      >
+      <button id="send-btn" onclick="sendMessage()" aria-label="Enviar">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M5 12H19M19 12L13 6M19 12L13 18" stroke="#0A0A0A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+</div>
+<script>
+// ─────────────────────────────────────────────
+//  CONFIG
+// ─────────────────────────────────────────────
+const API_URL      = '/.netlify/functions/chat';
+const STORAGE_KEY  = 'newbot_user_v2';
+
+// ─────────────────────────────────────────────
+//  TEMAS Y FRASES
+// ─────────────────────────────────────────────
+const TOPICS = [
+  "¿Tu equipo está usando correctamente la IA? 👀",
+  "Cómo escribir un prompt que realmente funcione 🚀",
+  "La IA te está mintiendo y no lo sabes 😵‍💫",
+  "¿Qué herramientas de IA ya tienes sin saberlo? 🔍",
+  "La diferencia entre ChatGPT, Copilot y Claude",
+  "¿Qué es un agente de IA y por qué cambia todo? 🤖",
+  "¿Por qué la IA no entiende lo que quieres? 😫",
+  "¿Puedes confiar en lo que dice la IA? 🤔",
+  "Cómo proteger los datos de tu empresa al usar IA 🕵🏻‍♂️",
+  "¿La IA va a reemplazar a las personas? 😳",
+  "¿Mi equipo no sabe nada de IA, por dónde parto?",
+  "¿Puedo implementar un programa de IA en toda mi organización?",
+];
+
+const CLOSING_PHRASES = [
+  "¿Por cuál empezamos?",
+  "¿Qué te genera más curiosidad?",
+  "¿Alguna de estas te resuena?",
+];
+
+function pickRandom(arr, n) {
+  return [...arr].sort(() => Math.random() - 0.5).slice(0, n);
+}
+
+// ─────────────────────────────────────────────
+//  STATE
+// ─────────────────────────────────────────────
+let userData = null;           // { name, role }
+let conversationHistory = [];
+let isTyping = false;
+
+// ─────────────────────────────────────────────
+//  INIT
+// ─────────────────────────────────────────────
+window.addEventListener('load', () => {
+  // Check localStorage for existing user
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (saved) {
+    try {
+      userData = JSON.parse(saved);
+      if (userData.name && userData.role) {
+        skipWelcome();
+        return;
+      }
+    } catch(e) {}
+  }
+  // Show welcome screen
+  setupWelcomeKeys();
+});
+
+function setupWelcomeKeys() {
+  ['input-name','input-role'].forEach(id => {
+    document.getElementById(id).addEventListener('keydown', e => {
+      if (e.key === 'Enter') startExperience();
+    });
+  });
+}
+
+// ─────────────────────────────────────────────
+//  WELCOME → CHAT TRANSITION
+// ─────────────────────────────────────────────
+function startExperience() {
+  const name = document.getElementById('input-name').value.trim();
+  const role = document.getElementById('input-role').value.trim();
+
+  if (!name) {
+    document.getElementById('input-name').focus();
+    document.getElementById('input-name').style.borderColor = '#94D500';
+    return;
+  }
+
+  userData = { name, role: role || 'no especificado' };
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(userData));
+
+  // Animate out welcome
+  document.getElementById('welcome').classList.add('hide');
+  setTimeout(() => {
+    document.getElementById('welcome').style.display = 'none';
+    launchChat();
+  }, 500);
+}
+
+function skipWelcome() {
+  document.getElementById('welcome').style.display = 'none';
+  launchChat();
+}
+
+function launchChat() {
+  const screen = document.getElementById('chat-screen');
+  screen.classList.add('show');
+
+  // Update header subtitle with user name
+  document.getElementById('header-sub') &&
+    (document.getElementById('header-sub').textContent = `Hola, ${userData.name} · Academia IA`);
+
+  // Wire up input
+  document.getElementById('user-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+  });
+  document.getElementById('user-input').addEventListener('input', () => {
+    if (document.getElementById('user-input').value.trim()) removeChips();
+  });
+
+  startConversation();
+}
+
+// ─────────────────────────────────────────────
+//  START CONVERSATION
+// ─────────────────────────────────────────────
+async function startConversation() {
+  const dias = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+  const dia  = dias[new Date().getDay()];
+
+  const msg1 = `Qué bueno tenerte aquí, ${userData.name} 👋`;
+  const msg2 = `¿Qué quieres aprender hoy ${dia} sobre IA?`;
+
+  await sendBotSequence([msg1, msg2]);
+
+  // Save to history so AI knows the greeting happened and has user context
+  conversationHistory.push({
+    role: 'assistant',
+    content: msg1 + '\n---\n' + msg2
+  });
+
+  setTimeout(showChips, 400);
+}
+
+// ─────────────────────────────────────────────
+//  CHIPS
+// ─────────────────────────────────────────────
+function showChips() {
+  if (document.getElementById('chips-container')) return;
+  const chat = document.getElementById('chat');
+  const wrap = document.createElement('div');
+  wrap.className = 'chips-wrap';
+  wrap.id = 'chips-container';
+
+  const label = document.createElement('div');
+  label.className = 'chips-label';
+  label.textContent = 'Aquí van algunas ideas — o escríbeme lo que quieras:';
+  wrap.appendChild(label);
+
+  pickRandom(TOPICS, 3).forEach(topic => {
+    const btn = document.createElement('button');
+    btn.className = 'chip';
+    btn.textContent = topic;
+    btn.onclick = () => {
+      removeChips();
+      document.getElementById('user-input').value = topic;
+      sendMessage();
+    };
+    wrap.appendChild(btn);
+  });
+
+  chat.appendChild(wrap);
+  scrollBottom();
+}
+
+function removeChips() {
+  const el = document.getElementById('chips-container');
+  if (el) el.remove();
+}
+
+function maybeShowChips(text) {
+  const triggers = ['qué quieres aprender','empezamos','aprender hoy','por dónde','curiosidad','ideas'];
+  if (triggers.some(t => text.toLowerCase().includes(t))) setTimeout(showChips, 400);
+}
+
+// ─────────────────────────────────────────────
+//  UTILS
+// ─────────────────────────────────────────────
+function getTime() {
+  return new Date().toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' });
+}
+function scrollBottom() {
+  const chat = document.getElementById('chat');
+  setTimeout(() => chat.scrollTop = chat.scrollHeight, 50);
+}
+
+// ─────────────────────────────────────────────
+//  RENDER BUBBLES
+// ─────────────────────────────────────────────
+function addBubble(text, role, showTime = true) {
+  const chat = document.getElementById('chat');
+  const wrap = document.createElement('div');
+  wrap.className = `bubble-wrap ${role}`;
+
+  const bubble = document.createElement('div');
+  bubble.className = `bubble ${role}`;
+  bubble.innerHTML = text
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/(https?:\/\/[^\s]+)/g,'<a href="$1" target="_blank" rel="noopener">$1</a>')
+    .replace(/\n/g,'<br>');
+  wrap.appendChild(bubble);
+
+  if (showTime) {
+    const ts = document.createElement('div');
+    ts.className = 'ts';
+    ts.textContent = getTime();
+    wrap.appendChild(ts);
+  }
+
+  chat.appendChild(wrap);
+  scrollBottom();
+}
+
+function showTyping() {
+  if (document.getElementById('typing-indicator')) return;
+  const chat = document.getElementById('chat');
+  const wrap = document.createElement('div');
+  wrap.className = 'bubble-wrap bot';
+  wrap.id = 'typing-indicator';
+  wrap.innerHTML = '<div class="typing-bubble"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';
+  chat.appendChild(wrap);
+  scrollBottom();
+}
+
+function hideTyping() {
+  const el = document.getElementById('typing-indicator');
+  if (el) el.remove();
+}
+
+async function sendBotSequence(parts) {
+  for (let i = 0; i < parts.length; i++) {
+    const text = parts[i].trim();
+    if (!text) continue;
+    showTyping();
+    const delay = Math.min(1400, Math.max(500, text.length * 14));
+    await new Promise(r => setTimeout(r, delay));
+    hideTyping();
+    addBubble(text, 'bot', i === parts.length - 1);
+    if (i < parts.length - 1) await new Promise(r => setTimeout(r, 280));
+  }
+}
+
+// ─────────────────────────────────────────────
+//  SEND MESSAGE
+// ─────────────────────────────────────────────
+async function sendMessage() {
+  if (isTyping) return;
+  const input = document.getElementById('user-input');
+  const text  = input.value.trim();
+  if (!text) return;
+
+  removeChips();
+
+  // Hide intro card on first message
+  const introCard = document.getElementById('intro-card');
+  if (introCard) {
+    introCard.style.transition = 'opacity 0.3s';
+    introCard.style.opacity = '0';
+    setTimeout(() => introCard.remove(), 300);
+  }
+
+  input.value = '';
+  input.disabled = true;
+  document.getElementById('send-btn').disabled = true;
+  isTyping = true;
+
+  addBubble(text, 'user');
+  conversationHistory.push({ role: 'user', content: text });
+
+  try {
+    showTyping();
+
+    const response = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        messages: conversationHistory,
+        // Pass user profile so the function can inject it in the system prompt
+        userProfile: userData
+      }),
+    });
+
+    if (!response.ok) throw new Error(`Error ${response.status}`);
+
+    const data    = await response.json();
+    const botText = data.text || '';
+
+    conversationHistory.push({ role: 'assistant', content: botText });
+
+    hideTyping();
+    const parts = botText.split(/\n---\n|^---$/m).map(p => p.trim()).filter(Boolean);
+    await sendBotSequence(parts);
+    maybeShowChips(botText);
+
+  } catch(err) {
+    hideTyping();
+    addBubble('Ups, tuve un problema de conexión. ¿Puedes intentarlo de nuevo? 🙏', 'bot');
+    console.error(err);
+  }
+
+  input.disabled = false;
+  document.getElementById('send-btn').disabled = false;
+  isTyping = false;
+  input.focus();
+}
+</script>
+</body>
+</html>
