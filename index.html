@@ -516,26 +516,32 @@ function pickRandom(arr, n) {
 // ─────────────────────────────────────────────
 //  STATE
 // ─────────────────────────────────────────────
-let userData = null;           // { name, role }
+let userData = null;
 let conversationHistory = [];
 let isTyping = false;
+let sessionId = null;
+
+function generateSessionId() {
+  return Date.now().toString(36) + Math.random().toString(36).substr(2, 6);
+}
 
 // ─────────────────────────────────────────────
 //  INIT
 // ─────────────────────────────────────────────
 window.addEventListener('load', () => {
-  // Check localStorage for existing user
   const saved = localStorage.getItem(STORAGE_KEY);
   if (saved) {
     try {
-      userData = JSON.parse(saved);
-      if (userData.name && userData.role) {
+      const parsed = JSON.parse(saved);
+      if (parsed.name && parsed.role) {
+        userData = { name: parsed.name, role: parsed.role };
+        conversationHistory = parsed.history || [];
+        sessionId = parsed.sessionId || generateSessionId();
         skipWelcome();
         return;
       }
     } catch(e) {}
   }
-  // Show welcome screen
   setupWelcomeKeys();
 });
 
@@ -560,8 +566,9 @@ function startExperience() {
     return;
   }
 
-  userData = { name, role: role || 'no especificado' };
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(userData));
+  userData  = { name, role: role || 'no especificado' };
+  sessionId = generateSessionId();
+  saveState();
 
   // Animate out welcome
   document.getElementById('welcome').classList.add('hide');
@@ -574,6 +581,15 @@ function startExperience() {
 function skipWelcome() {
   document.getElementById('welcome').style.display = 'none';
   launchChat();
+}
+
+function saveState() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({
+    name:      userData.name,
+    role:      userData.role,
+    sessionId: sessionId,
+    history:   conversationHistory.slice(-30), // últimos 30 mensajes
+  }));
 }
 
 function launchChat() {
@@ -602,18 +618,36 @@ async function startConversation() {
   const dias = ['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
   const dia  = dias[new Date().getDay()];
 
+  // Si hay historial previo, mostrar los mensajes anteriores y saludar de vuelta
+  if (conversationHistory.length > 0) {
+    restoreHistory();
+    const msg = `Seguimos donde lo dejamos, ${userData.name} 👋`;
+    await sendBotSequence([msg]);
+    conversationHistory.push({ role: 'assistant', content: msg });
+    setTimeout(showChips, 400);
+    return;
+  }
+
+  // Primera vez
   const msg1 = `Qué bueno tenerte aquí, ${userData.name} 👋`;
   const msg2 = `¿Qué quieres aprender hoy ${dia} sobre IA?`;
 
   await sendBotSequence([msg1, msg2]);
-
-  // Save to history so AI knows the greeting happened and has user context
-  conversationHistory.push({
-    role: 'assistant',
-    content: msg1 + '\n---\n' + msg2
-  });
-
+  conversationHistory.push({ role: 'assistant', content: msg1 + '\n---\n' + msg2 });
   setTimeout(showChips, 400);
+}
+
+function restoreHistory() {
+  // Mostrar los últimos mensajes del historial en el chat
+  const recent = conversationHistory.slice(-10);
+  recent.forEach((msg, i) => {
+    const role = msg.role === 'user' ? 'user' : 'bot';
+    const parts = msg.content.split(/\n---\n/).map(p => p.trim()).filter(Boolean);
+    parts.forEach((part, j) => {
+      const isLast = i === recent.length - 1 && j === parts.length - 1;
+      addBubble(part, role, isLast);
+    });
+  });
 }
 
 // ─────────────────────────────────────────────
@@ -750,6 +784,7 @@ async function sendMessage() {
 
   addBubble(text, 'user');
   conversationHistory.push({ role: 'user', content: text });
+  saveState();
 
   try {
     showTyping();
@@ -758,9 +793,9 @@ async function sendMessage() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        messages: conversationHistory,
-        // Pass user profile so the function can inject it in the system prompt
-        userProfile: userData
+        messages:    conversationHistory,
+        userProfile: userData,
+        sessionId:   sessionId,
       }),
     });
 
@@ -768,6 +803,9 @@ async function sendMessage() {
 
     const data    = await response.json();
     const botText = data.text || '';
+
+    conversationHistory.push({ role: 'assistant', content: botText });
+    saveState(); // Guardar historial actualizado
 
     conversationHistory.push({ role: 'assistant', content: botText });
 
