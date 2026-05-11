@@ -160,14 +160,21 @@ Evaluación medible (Kirkpatrick): antes, durante y 30-60 días después.`;
 // ─────────────────────────────────────────────
 async function logToSheets(payload) {
   const webhookUrl = process.env.SHEETS_WEBHOOK_URL;
-  if (!webhookUrl) return; // Si no está configurado, ignora silenciosamente
+  if (!webhookUrl) return;
 
   try {
+    // Usar AbortController para timeout de 4 segundos
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 4000);
+
     await fetch(webhookUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
+      signal: controller.signal,
     });
+
+    clearTimeout(timeout);
   } catch(err) {
     // No interrumpir la conversación si falla el logging
     console.error('Sheets logging error:', err.message);
@@ -240,9 +247,9 @@ exports.handler = async (event) => {
     const data = await response.json();
     const text = data.content?.[0]?.text || '';
 
-    // Detectar hitos y loguear a Google Sheets (sin await — no bloquea la respuesta)
+    // Detectar hitos y loguear a Google Sheets (con await + timeout)
     const milestones = detectMilestones(text);
-    logToSheets({
+    await logToSheets({
       sessionId,
       name:             userProfile.name || '',
       role:             userProfile.role || '',
