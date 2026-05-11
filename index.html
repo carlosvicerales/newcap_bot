@@ -638,11 +638,19 @@ async function startConversation() {
 }
 
 function restoreHistory() {
-  // Mostrar los últimos mensajes del historial en el chat
+  // Limpiar duplicados consecutivos que puedan haber quedado en localStorage
+  const cleaned = conversationHistory.filter((msg, i) => {
+    if (i === 0) return true;
+    const prev = conversationHistory[i - 1];
+    return !(msg.role === prev.role && msg.content === prev.content);
+  });
+  conversationHistory.length = 0;
+  cleaned.forEach(m => conversationHistory.push(m));
+
   const recent = conversationHistory.slice(-10);
   recent.forEach((msg, i) => {
-    const role = msg.role === 'user' ? 'user' : 'bot';
-    const parts = msg.content.split(/\n---\n/).map(p => p.trim()).filter(Boolean);
+    const role  = msg.role === 'user' ? 'user' : 'bot';
+    const parts = msg.content.split(/\n\s*---\s*\n/).map(p => p.trim()).filter(Boolean);
     parts.forEach((part, j) => {
       const isLast = i === recent.length - 1 && j === parts.length - 1;
       addBubble(part, role, isLast);
@@ -804,14 +812,25 @@ async function sendMessage() {
     const data    = await response.json();
     const botText = data.text || '';
 
+    // Guardar UNA sola vez en historial
     conversationHistory.push({ role: 'assistant', content: botText });
-    saveState(); // Guardar historial actualizado
-
-    conversationHistory.push({ role: 'assistant', content: botText });
+    saveState();
 
     hideTyping();
-    const parts = botText.split(/\n---\n|^---$/m).map(p => p.trim()).filter(Boolean);
-    await sendBotSequence(parts);
+
+    // Split más robusto: solo separa en líneas que contienen únicamente ---
+    const rawParts = botText.split(/\n\s*---\s*\n/);
+    const parts = rawParts.map(p => p.trim()).filter(Boolean);
+
+    // Deduplicar por si el modelo repite partes idénticas
+    const seen = new Set();
+    const uniqueParts = parts.filter(p => {
+      if (seen.has(p)) return false;
+      seen.add(p);
+      return true;
+    });
+
+    await sendBotSequence(uniqueParts);
     maybeShowChips(botText);
 
   } catch(err) {
