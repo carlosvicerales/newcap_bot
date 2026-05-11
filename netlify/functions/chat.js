@@ -1,6 +1,7 @@
 // ─────────────────────────────────────────────
 //  NewBot · Netlify Function · chat.js v2
 //  Sistema de prompt dinámico con perfil de usuario
+//  + Logging a Google Sheets
 // ─────────────────────────────────────────────
 
 function buildSystemPrompt(name, role) {
@@ -155,6 +156,38 @@ Evaluación medible (Kirkpatrick): antes, durante y 30-60 días después.`;
 }
 
 // ─────────────────────────────────────────────
+//  LOGGING A GOOGLE SHEETS
+// ─────────────────────────────────────────────
+async function logToSheets(payload) {
+  const webhookUrl = process.env.SHEETS_WEBHOOK_URL;
+  if (!webhookUrl) return; // Si no está configurado, ignora silenciosamente
+
+  try {
+    await fetch(webhookUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+  } catch(err) {
+    // No interrumpir la conversación si falla el logging
+    console.error('Sheets logging error:', err.message);
+  }
+}
+
+function detectMilestones(botText) {
+  const t = botText.toLowerCase();
+  return {
+    ecosistema: t.includes('microsoft') ? 'Microsoft 365'
+               : t.includes('google workspace') || t.includes('google') ? 'Google Workspace'
+               : null,
+    interestDetected: t.includes('brecha') || t.includes('aprovechando') ||
+                      t.includes('explorar cómo') || t.includes('se vería esto') ||
+                      t.includes('programa') && t.includes('organización'),
+    calendlyShown: t.includes('calendly.com'),
+  };
+}
+
+// ─────────────────────────────────────────────
 //  HANDLER
 // ─────────────────────────────────────────────
 exports.handler = async (event) => {
@@ -163,11 +196,12 @@ exports.handler = async (event) => {
     return { statusCode: 405, body: 'Method Not Allowed' };
   }
 
-  let messages, userProfile;
+  let messages, userProfile, sessionId;
   try {
     const body = JSON.parse(event.body);
     messages    = body.messages;
     userProfile = body.userProfile || {};
+    sessionId   = body.sessionId || 'unknown';
     if (!messages || !Array.isArray(messages)) throw new Error('missing messages');
   } catch(e) {
     return { statusCode: 400, body: JSON.stringify({ error: 'Bad request' }) };
@@ -205,6 +239,19 @@ exports.handler = async (event) => {
 
     const data = await response.json();
     const text = data.content?.[0]?.text || '';
+
+    // Detectar hitos y loguear a Google Sheets (sin await — no bloquea la respuesta)
+    const milestones = detectMilestones(text);
+    logToSheets({
+      sessionId,
+      name:             userProfile.name || '',
+      role:             userProfile.role || '',
+      ecosystem:        milestones.ecosistema,
+      interestDetected: milestones.interestDetected,
+      calendlyShown:    milestones.calendlyShown,
+      lastBotMessage:   text.substring(0, 300),
+      timestamp:        new Date().toISOString(),
+    });
 
     return {
       statusCode: 200,
