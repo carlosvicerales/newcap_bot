@@ -401,16 +401,15 @@
     <div class="welcome-body">
       <div class="welcome-title">
         <h1>Hola 👋 Soy NewBot</h1>
-        <p>Tu asesor de la Academia IA de NewCap</p>
+        <p>Ayudo a potenciar tu rol con Inteligencia Artificial.</p>
       </div>
 
       <div class="welcome-copy">
         <p>
-          Para que cada conversación sea realmente útil,
-          necesito conocerte un poco.
+          Voy a adaptar cada conversación a ti y a tu organización.
         </p>
         <p style="margin-top:8px; color: var(--green);">
-          Solo te lo pedimos una vez. Prometido 😊
+          Ingresa tu nombre y correo para empezar.
         </p>
       </div>
 
@@ -427,12 +426,13 @@
           >
         </div>
         <div>
-          <label class="field-label" for="input-role">¿Cuál es tu cargo o rol?</label>
+          <label class="field-label" for="input-email">Tu correo electrónico</label>
           <input
             class="welcome-input"
-            id="input-role"
-            type="text"
-            placeholder="Ej: Jefa de Capacitación, Consultor, Gerente RRHH..."
+            id="input-email"
+            type="email"
+            placeholder="correo@empresa.com"
+            autocomplete="email"
             spellcheck="false"
           >
         </div>
@@ -533,8 +533,8 @@ window.addEventListener('load', () => {
   if (saved) {
     try {
       const parsed = JSON.parse(saved);
-      if (parsed.name && parsed.role) {
-        userData = { name: parsed.name, role: parsed.role };
+      if (parsed.name && parsed.email) {
+        userData = { name: parsed.name, email: parsed.email };
         conversationHistory = parsed.history || [];
         sessionId = parsed.sessionId || generateSessionId();
         skipWelcome();
@@ -546,7 +546,7 @@ window.addEventListener('load', () => {
 });
 
 function setupWelcomeKeys() {
-  ['input-name','input-role'].forEach(id => {
+  ['input-name','input-email'].forEach(id => {
     document.getElementById(id).addEventListener('keydown', e => {
       if (e.key === 'Enter') startExperience();
     });
@@ -557,16 +557,21 @@ function setupWelcomeKeys() {
 //  WELCOME → CHAT TRANSITION
 // ─────────────────────────────────────────────
 function startExperience() {
-  const name = document.getElementById('input-name').value.trim();
-  const role = document.getElementById('input-role').value.trim();
+  const name  = document.getElementById('input-name').value.trim();
+  const email = document.getElementById('input-email').value.trim();
 
   if (!name) {
     document.getElementById('input-name').focus();
     document.getElementById('input-name').style.borderColor = '#94D500';
     return;
   }
+  if (!email || !email.includes('@')) {
+    document.getElementById('input-email').focus();
+    document.getElementById('input-email').style.borderColor = '#94D500';
+    return;
+  }
 
-  userData  = { name, role: role || 'no especificado' };
+  userData  = { name, email };
   sessionId = generateSessionId();
   saveState();
 
@@ -586,9 +591,9 @@ function skipWelcome() {
 function saveState() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify({
     name:      userData.name,
-    role:      userData.role,
+    email:     userData.email,
     sessionId: sessionId,
-    history:   conversationHistory.slice(-30), // últimos 30 mensajes
+    history:   conversationHistory.slice(-30),
   }));
 }
 
