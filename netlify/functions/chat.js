@@ -73,7 +73,9 @@ function detectMilestones(text) {
   return {
     ecosystem:        t.includes('microsoft') ? 'Microsoft 365' : t.includes('google') ? 'Google Workspace' : null,
     interestDetected: t.includes('evaluemos juntos') || t.includes('se vería esto') || t.includes('aprovechando bien'),
-    calendlyShown:    t.includes('outlook.office.com') || t.includes('bookwithme'),
+    calendlyShown:    t.includes('outlook.office.com') || t.includes('bookwithme') ||
+                      t.includes('meetingtype') || t.includes('newcap.cl') ||
+                      t.includes('agendar') && t.includes('equipo'),
   };
 }
 
