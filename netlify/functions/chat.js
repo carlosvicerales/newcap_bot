@@ -131,6 +131,21 @@ async function logToSheets(payload) {
   }
 }
 
+function extractRole(messages) {
+  // Busca el mensaje del usuario que sigue a una pregunta del bot sobre cargo/rol
+  for (let i = 1; i < messages.length; i++) {
+    const prev = messages[i - 1];
+    const curr = messages[i];
+    if (prev.role === 'assistant' && curr.role === 'user') {
+      const botText = prev.content.toLowerCase();
+      if (botText.includes('cargo') || botText.includes('rol') || botText.includes('puesto')) {
+        return curr.content.substring(0, 100);
+      }
+    }
+  }
+  return null;
+}
+
 function detectMilestones(botText) {
   const t = botText.toLowerCase();
   return {
@@ -198,10 +213,12 @@ exports.handler = async (event) => {
 
     // Detectar hitos y loguear a Google Sheets
     const milestones = detectMilestones(text);
+    const role       = extractRole(messages);
     await logToSheets({
       sessionId,
       name,
       email,
+      role:             role,
       ecosystem:        milestones.ecosistema,
       interestDetected: milestones.interestDetected,
       calendlyShown:    milestones.calendlyShown,
