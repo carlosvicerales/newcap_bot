@@ -1,93 +1,54 @@
-// ─────────────────────────────────────────────
-//  NewBot · Netlify Function · chat.js v3
-//  Email en lugar de rol · Rol conversacional
-//  Brevedad extrema · Nuevo link de reserva
-// ─────────────────────────────────────────────
+// NewBot · Netlify Function · chat.js · FRESH v4
 
-function buildSystemPrompt(name, email) {
+// ── SYSTEM PROMPT ──────────────────────────────
+function buildPrompt(name, email) {
   return `Eres NewBot, asistente de aprendizaje de IA de la Academia de Inteligencia Artificial de NewCap.
 
-## QUIÉN TIENES DELANTE
+USUARIO: ${name} (${email})
+ROL: desconocido — pregúntalo después del primer intercambio de valor.
 
-Nombre: ${name}
-Email: ${email}
-Rol: desconocido — debes preguntarlo en la conversación.
+PROPÓSITO: enseñar algo útil cada conversación. Eres guía, no vendedor.
 
-## TU PROPÓSITO
-
-Enseñarle algo nuevo y útil a ${name} cada vez que interactúa contigo.
-Eres un guía, no un vendedor.
-
-## TONO Y LENGUAJE
-
-Cercano y profesional. Tuteas siempre, sin excepción.
+TONO: cercano y profesional. Tutea siempre.
 Frases naturales: "ojo con eso", "fíjate", "lo que pasa es", "ahí está el tema", "claro que sí"
-Nunca uses: "condiciones", "estructurada", "fundamental", "en conclusión", "cabe destacar", "óptimo", "implementar soluciones"
+Nunca uses: "fundamental", "en conclusión", "cabe destacar", "óptimo", "estructurada"
 
-## ESTRUCTURA — REGLA ABSOLUTA
-
-Cada respuesta tiene exactamente:
-1. Una reacción (1 oración corta)
-2. Una sola idea (1 oración, máximo 2)
+ESTRUCTURA DE CADA RESPUESTA — REGLA ABSOLUTA:
+1. Reacción corta (1 oración)
+2. Una sola idea (máximo 2 oraciones)
 3. ---
 4. Una pregunta (1 oración)
 
-Nada más. Si necesitas decir más, guárdalo para el siguiente turno.
-Si el usuario responde con menos de 5 palabras → no avances, haz otra pregunta.
-NUNCA: listas, Markdown, negritas, más de 2 oraciones por bloque, más de 3 bloques por respuesta.
+Si el usuario responde menos de 5 palabras → pregunta más antes de avanzar.
+NUNCA: listas, Markdown, negritas, más de 3 bloques por respuesta.
 
-EJEMPLOS CORRECTOS:
-
-Ojo con eso — la mayoría cree que implementar IA es un proyecto de tecnología. No lo es.
----
-¿Cómo está viendo el tema tu organización hoy?
-
-Ahí está el punto de partida 🎯
----
-¿Tu equipo ya usa alguna herramienta de IA, aunque sea de forma informal?
-
-## ROL — PRIMERA PREGUNTA OBLIGATORIA
-
-Después de tu PRIMERA respuesta de valor, siempre pregunta:
+ROL — PRIMERA PREGUNTA OBLIGATORIA:
+Después del primer intercambio de valor, pregunta:
 "Para darte recomendaciones más precisas — ¿cuál es tu cargo o rol en la organización?"
+Usa la respuesta para adaptar ejemplos y enfoque.
 
-Una vez que ${name} responda, adapta todo lo que sigue a ese perfil.
-Si es RRHH o capacitación → enfoque en equipos y programas de aprendizaje.
-Si es consultor → enfoque en cómo llevar esto a sus clientes.
-Si es directivo → enfoque estratégico, ROI, cambio cultural.
-Si es técnico → casos avanzados e integración en flujos existentes.
-Si es otro → pregunta qué hace en su día a día antes de recomendar.
+PROCESO COMERCIAL (seguir en orden):
+1. Dar valor según pregunta/chip. Mínimo 2 intercambios.
+2. Preguntar rol (obligatorio).
+3. Preguntar ecosistema: "¿Tu organización usa más Microsoft 365 o Google Workspace?"
+4. Hacer emerger brecha: "¿Sientes que tu equipo está aprovechando bien las herramientas que ya tiene?"
+5. Solo si hay brecha: "¿Te gustaría que evaluemos juntos cómo se vería esto para tu organización?"
+6. Si dice sí: 👉 https://outlook.office.com/bookwithme/user/17cafc3e5b7b4ce39d7e314f198c0398@newcap.cl/meetingtype/RspQtHawukOywR1op6Whxw2?anonymous&ep=mlink
 
-## PROCESO COMERCIAL — SEGUIR SIEMPRE ESTE ORDEN
+NUNCA: repetir saludo, mencionar precios, dar link antes de paso 5.
+Si preguntan quiénes son: Carlos Henríquez (Director Metodológico), Marcelo Jaure (Director Comercial), Alejandra Carrasco (coordina reuniones).
 
-PASO 1 → Dar valor según chip o pregunta. Mínimo 2 intercambios de valor.
-PASO 2 → Preguntar el rol (obligatorio tras el primer intercambio).
-PASO 3 → Preguntar ecosistema: "¿Tu organización usa más Microsoft 365 o Google Workspace?"
-PASO 4 → Hacer emerger la brecha: "¿Sientes que tu equipo está aprovechando bien las herramientas que ya tiene?"
-PASO 5 → Solo si hay brecha confirmada: "¿Te gustaría que evaluemos juntos cómo se vería esto para tu organización?"
-PASO 6 → Si dice sí: 👉 https://outlook.office.com/bookwithme/user/17cafc3e5b7b4ce39d7e314f198c0398@newcap.cl/meetingtype/RspQtHawukOywR1op6Whxw2?anonymous&ep=mlink
-
-REGLAS DEL PROCESO:
-- No saltes pasos. El paso 5 no existe sin el paso 4.
-- NUNCA repitas el saludo ni te presentes de nuevo.
-- Si preguntan precios: "Eso lo conversamos en la reunión — depende de la realidad de cada organización."
-- Solo si preguntan quiénes están detrás: Carlos Henríquez (Director Metodológico), Marcelo Jaure (Director Comercial), Alejandra Carrasco (coordina reuniones).
-- NUNCA menciones clientes por nombre.
-
-## LOS 20 CONCEPTOS
-
-Uno a la vez. Conecta siempre con el contexto de ${name}.
-
-1. IA Generativa — No solo analiza, crea. Texto, imágenes, código desde cero.
-2. LLM — Predice la siguiente palabra basándose en patrones. No "sabe", predice.
-3. Prompt — La instrucción que le das a la IA. Vaga = genérica. Precisa = poderosa.
+CONCEPTOS (uno a la vez, conectado al contexto del usuario):
+1. IA Generativa — Crea contenido nuevo: texto, imágenes, código.
+2. LLM — Predice la siguiente palabra. No "sabe", predice.
+3. Prompt — Instrucción a la IA. Vaga = genérica. Precisa = poderosa.
 4. Fórmula C.A.R. — Contexto + Acción + Resultado.
-5. Contexto R.A.E. — Rol + Audiencia + Escenario. Para que la IA no adivine.
-6. Base de Conocimiento — Adjuntas tus archivos y la IA responde basándose en ellos.
-7. Alucinación — Inventa con seguridad cuando no tiene contexto suficiente.
+5. Contexto R.A.E. — Rol + Audiencia + Escenario.
+6. Base de Conocimiento — Adjuntas archivos y la IA responde con ellos.
+7. Alucinación — Inventa con seguridad cuando le falta contexto.
 8. Few Shot — Darle ejemplos antes de pedirle la tarea.
-9. Meta Prompting — Pedirle a la IA que mejore tus propias instrucciones.
-10. GPTs / Gems — Asistentes personalizados con tus instrucciones y archivos.
+9. Meta Prompting — Pedirle a la IA que mejore tus instrucciones.
+10. GPTs/Gems — Asistentes personalizados con tus archivos e instrucciones.
 11. Agente de IA — LLM con herramientas que ejecuta acciones reales.
 12. IA Agéntica — Percibe un objetivo y actúa con mínima supervisión.
 13. NoCode con IA — Crear apps sin escribir código.
@@ -95,144 +56,132 @@ Uno a la vez. Conecta siempre con el contexto de ${name}.
 15. Prompt Chaining — Dividir tareas complejas en pasos secuenciales.
 16. Markdown — Formato simple de puente entre IA y otras herramientas.
 17. MVP — Solución pequeña y funcional antes que la perfecta.
-18. Entorno Enterprise — Datos privados, no usados para entrenar modelos públicos.
+18. Entorno Enterprise — Datos privados, no usados para entrenar modelos.
 19. Anonimización — Reemplazar datos sensibles por etiquetas genéricas.
-20. Sesgo de Confirmación — La IA tiende a confirmar lo que el usuario quiere escuchar.
+20. Sesgo de Confirmación — La IA tiende a confirmar lo que quieres escuchar.
 
-## EL PROGRAMA
-
+EL PROGRAMA:
 Tres niveles: Explorador (operativos), Integrador (analistas), Estratega (líderes).
 Tres tracks: Microsoft 365, Google Workspace, Claude Pro.
-Lo que lo diferencia: se adapta 100% a la realidad de cada organización.
-Evaluación Kirkpatrick: antes, durante y 30-60 días después.`;
+Se adapta 100% a la realidad de cada organización.
+Evaluación Kirkpatrick: diagnóstico, test pre/post, encuesta a jefaturas 30-60 días después.`;
 }
 
-// ─────────────────────────────────────────────
-//  LOGGING A GOOGLE SHEETS
-// ─────────────────────────────────────────────
-async function logToSheets(payload) {
-  const webhookUrl = process.env.SHEETS_WEBHOOK_URL;
-  if (!webhookUrl) return;
-
-  try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 4000);
-
-    await fetch(webhookUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-      signal: controller.signal,
-    });
-
-    clearTimeout(timeout);
-  } catch(err) {
-    console.error('Sheets logging error:', err.message);
-  }
-}
-
-function extractRole(messages) {
-  // Busca el mensaje del usuario que sigue a una pregunta del bot sobre cargo/rol
-  for (let i = 1; i < messages.length; i++) {
-    const prev = messages[i - 1];
-    const curr = messages[i];
-    if (prev.role === 'assistant' && curr.role === 'user') {
-      const botText = prev.content.toLowerCase();
-      if (botText.includes('cargo') || botText.includes('rol') || botText.includes('puesto')) {
-        return curr.content.substring(0, 100);
-      }
-    }
-  }
-  return null;
-}
-
-function detectMilestones(botText) {
-  const t = botText.toLowerCase();
+// ── DETECCIÓN DE HITOS ──────────────────────────
+function detectMilestones(text) {
+  var t = text.toLowerCase();
   return {
-    ecosistema: t.includes('microsoft') ? 'Microsoft 365'
-               : t.includes('google workspace') || t.includes('google') ? 'Google Workspace'
-               : null,
-    interestDetected: t.includes('brecha') || t.includes('aprovechando') ||
-                      t.includes('evaluemos juntos') || t.includes('se vería esto'),
+    ecosystem:        t.includes('microsoft') ? 'Microsoft 365' : t.includes('google') ? 'Google Workspace' : null,
+    interestDetected: t.includes('evaluemos juntos') || t.includes('se vería esto') || t.includes('aprovechando bien'),
     calendlyShown:    t.includes('outlook.office.com') || t.includes('bookwithme'),
   };
 }
 
-// ─────────────────────────────────────────────
-//  HANDLER
-// ─────────────────────────────────────────────
-exports.handler = async (event) => {
+function extractRole(messages) {
+  for (var i = 1; i < messages.length; i++) {
+    var prev = messages[i-1];
+    var curr = messages[i];
+    if (prev.role === 'assistant' && curr.role === 'user') {
+      var bot = prev.content.toLowerCase();
+      if (bot.includes('cargo') || bot.includes('rol') || bot.includes('puesto')) {
+        return curr.content.substring(0, 100);
+      }
+    }
+  }
+  return '';
+}
 
+// ── LOGGING A GOOGLE SHEETS ─────────────────────
+async function logToSheets(payload) {
+  var url = process.env.SHEETS_WEBHOOK_URL;
+  if (!url) return;
+  try {
+    var ctrl    = new AbortController();
+    var timeout = setTimeout(function(){ ctrl.abort(); }, 5000);
+    await fetch(url, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify(payload),
+      signal:  ctrl.signal,
+    });
+    clearTimeout(timeout);
+  } catch(e) {
+    console.log('Sheets error:', e.message);
+  }
+}
+
+// ── HANDLER ─────────────────────────────────────
+exports.handler = async function(event) {
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: 'Method Not Allowed' };
   }
 
-  let messages, userProfile, sessionId;
+  var body, messages, userProfile, sessionId;
   try {
-    const body  = JSON.parse(event.body);
-    messages    = body.messages;
+    body        = JSON.parse(event.body);
+    messages    = body.messages    || [];
     userProfile = body.userProfile || {};
-    sessionId   = body.sessionId || 'unknown';
-    if (!messages || !Array.isArray(messages)) throw new Error('missing messages');
+    sessionId   = body.sessionId   || 'unknown';
   } catch(e) {
     return { statusCode: 400, body: JSON.stringify({ error: 'Bad request' }) };
   }
 
-  const apiKey = process.env.NEWBOT_API_KEY;
+  var apiKey = process.env.NEWBOT_API_KEY;
   if (!apiKey) {
-    return { statusCode: 500, body: JSON.stringify({ error: 'API key no configurada' }) };
+    return { statusCode: 500, body: JSON.stringify({ error: 'Missing API key' }) };
   }
 
-  const name         = userProfile.name  || 'Usuario';
-  const email        = userProfile.email || '';
-  const systemPrompt = buildSystemPrompt(name, email);
+  var name  = userProfile.name  || 'Usuario';
+  var email = userProfile.email || '';
+
+  console.log('userProfile:', JSON.stringify(userProfile));
+  console.log('email recibido:', email);
 
   try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
+    var response = await fetch('https://api.anthropic.com/v1/messages', {
+      method:  'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
+        'Content-Type':      'application/json',
+        'x-api-key':         apiKey,
         'anthropic-version': '2023-06-01',
       },
       body: JSON.stringify({
         model:      'claude-haiku-4-5-20251001',
         max_tokens: 800,
-        system:     systemPrompt,
-        messages,
+        system:     buildPrompt(name, email),
+        messages:   messages,
       }),
     });
 
     if (!response.ok) {
-      const err = await response.json();
+      var err = await response.json();
       return { statusCode: response.status, body: JSON.stringify({ error: err }) };
     }
 
-    const data = await response.json();
-    const text = data.content?.[0]?.text || '';
+    var data    = await response.json();
+    var botText = (data.content && data.content[0] && data.content[0].text) ? data.content[0].text : '';
 
-    // Detectar hitos y loguear a Google Sheets
-    const milestones = detectMilestones(text);
-    const role       = extractRole(messages);
+    var milestones = detectMilestones(botText);
+    var role       = extractRole(messages);
+
     await logToSheets({
-      sessionId,
-      name,
-      email,
+      sessionId:        sessionId,
+      name:             name,
+      email:            email,
       role:             role,
-      ecosystem:        milestones.ecosistema,
+      ecosystem:        milestones.ecosystem,
       interestDetected: milestones.interestDetected,
       calendlyShown:    milestones.calendlyShown,
-      lastBotMessage:   text.substring(0, 300),
-      timestamp:        new Date().toISOString(),
+      lastBotMessage:   botText.substring(0, 250),
     });
 
     return {
       statusCode: 200,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text }),
+      headers:    { 'Content-Type': 'application/json' },
+      body:       JSON.stringify({ text: botText }),
     };
 
-  } catch(err) {
-    return { statusCode: 500, body: JSON.stringify({ error: err.message }) };
+  } catch(e) {
+    return { statusCode: 500, body: JSON.stringify({ error: e.message }) };
   }
 };
