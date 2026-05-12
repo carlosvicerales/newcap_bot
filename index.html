@@ -83,40 +83,61 @@
   .welcome-body {
     flex: 1;
     width: 100%;
-    padding: 28px 28px 40px;
+    padding: 20px 28px 40px;
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 16px;
   }
 
   .welcome-title {
     text-align: center;
+    line-height: 1.15;
   }
 
-  .welcome-title h1 {
-    font-size: 26px;
-    font-weight: 700;
-    color: var(--white);
-    line-height: 1.2;
+  .welcome-title .greeting {
+    font-size: 13px;
+    font-weight: 300;
+    color: rgba(255,255,255,0.45);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    display: block;
     margin-bottom: 6px;
   }
 
-  .welcome-title p {
+  .welcome-title h1 {
+    font-size: 36px;
+    font-weight: 700;
+    line-height: 1.0;
+    margin-bottom: 6px;
+    letter-spacing: -0.02em;
+  }
+
+  .welcome-title h1 .new { color: var(--white); font-weight: 300; }
+  .welcome-title h1 .bot { color: var(--green); font-weight: 700; }
+
+  .welcome-title .tagline {
     font-size: 13px;
     font-weight: 300;
     color: var(--green);
-    letter-spacing: 0.03em;
+    line-height: 1.4;
+    display: block;
   }
 
   .welcome-copy {
+    text-align: center;
     padding: 0 4px;
   }
 
   .welcome-copy p {
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 300;
-    color: var(--gray-300);
-    line-height: 1.7;
+    color: rgba(255,255,255,0.6);
+    line-height: 1.6;
+  }
+
+  .welcome-copy p strong {
+    font-weight: 600;
+    color: var(--white);
   }
 
   .welcome-form {
@@ -400,17 +421,13 @@
 
     <div class="welcome-body">
       <div class="welcome-title">
-        <h1>Hola 👋 Soy NewBot</h1>
-        <p>Ayudo a potenciar tu rol con Inteligencia Artificial.</p>
+        <span class="greeting">Hola 👋 Soy</span>
+        <h1><span class="new">New</span><span class="bot">Bot</span></h1>
+        <span class="tagline">Ayudo a potenciar tu rol con Inteligencia Artificial.</span>
       </div>
 
       <div class="welcome-copy">
-        <p>
-          Voy a adaptar cada conversación a ti y a tu organización.
-        </p>
-        <p style="margin-top:8px; color: var(--green);">
-          Ingresa tu nombre y correo para empezar.
-        </p>
+        <p>Voy a <strong>adaptar cada conversación</strong> a ti y a tu organización. Ingresa tu nombre y correo corporativo para empezar.</p>
       </div>
 
       <div class="welcome-form">
@@ -426,12 +443,12 @@
           >
         </div>
         <div>
-          <label class="field-label" for="input-email">Tu correo electrónico</label>
+          <label class="field-label" for="input-email">Correo corporativo</label>
           <input
             class="welcome-input"
             id="input-email"
             type="email"
-            placeholder="correo@empresa.com"
+            placeholder="nombre@tuempresa.com"
             autocomplete="email"
             spellcheck="false"
           >
