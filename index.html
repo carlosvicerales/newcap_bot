@@ -243,8 +243,14 @@
   .bot-avatar img { width: 100%; height: 100%; object-fit: cover; object-position: center 8%; }
 
   .header-info { flex: 1; }
-  .header-name { font-size: 16px; font-weight: 700; color: var(--white); line-height: 1.2; }
-  .header-sub  { font-size: 12px; font-weight: 300; color: var(--green); margin-top: 1px; }
+  .header-name {
+    font-size: 18px;
+    line-height: 1.1;
+    margin-bottom: 2px;
+  }
+  .header-name .new { color: var(--white); font-weight: 300; }
+  .header-name .bot { color: var(--green); font-weight: 700; }
+  .header-sub  { font-size: 11px; font-weight: 300; color: var(--green); margin-top: 1px; }
 
   .header-right { display: flex; align-items: center; gap: 8px; }
 
@@ -470,8 +476,8 @@
         <img src="/newbot-avatar.png" alt="NewBot">
       </div>
       <div class="header-info">
-        <div class="header-name">NewBot</div>
-        <div class="header-sub">Academia IA</div>
+        <div class="header-name"><span class="new">New</span><span class="bot">Bot</span></div>
+        <div class="header-sub" id="header-sub">Academia IA · NewCap</div>
       </div>
       <div class="header-right">
         <div class="status-dot"></div>
